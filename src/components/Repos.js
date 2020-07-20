@@ -5,53 +5,94 @@ import { ExampleChart, Pie3D, Column3D, Bar3D, Doughnut2D } from "./Charts";
 const Repos = () => {
   const { repos } = React.useContext(GithubContext);
 
-  let languages = repos.reduce((total, item) => {
-    // destuct language value from item[language]
-    const { language } = item;
+  const languages = repos.reduce((total, item) => {
+    // destuct item
+    const { language, stargazers_count } = item;
     //language==null
     if (!language) return total;
     //calculate the language number
     // set total arr and if new language set the index and vale = 1 else value +1
     if (!total[language]) {
       //match chartData value by setting new objects
-      total[language] = { label: language, value: 1 };
+      total[language] = {
+        label: language,
+        value: 1,
+        stars: stargazers_count,
+      };
     } else {
       total[language] = {
         ...total[language],
         value: total[language].value + 1,
+        stars: total[language].stars + stargazers_count,
       };
     }
-    // console.log(language);
 
     return total;
   }, {});
-  //set array to objects and sort top 5 languages
-  languages = Object.values(languages)
+
+  //set objects to array and sort top 5 languages
+  const mostUsed = Object.values(languages)
     .sort((a, b) => {
       return b.value - a.value;
     })
     .slice(0, 5);
 
+  // most stars per language
+  const mostPopular = Object.values(languages)
+    .sort((a, b) => {
+      return b.stars - a.stars;
+    })
+    // overwrite  stars to value let chart can display stars value
+    .map((item) => {
+      return { ...item, value: item.stars };
+    })
+    .slice(0, 5);
+
+  // stars, forks
+  // same as top , but just destruct it and callback
+  let { stars, forks } = repos.reduce(
+    (total, item) => {
+      const { stargazers_count, name, forks } = item;
+      total.stars[stargazers_count] = {
+        label: name,
+        value: stargazers_count,
+      };
+      total.forks[forks] = { label: name, value: forks };
+      return total;
+    },
+    {
+      stars: {},
+      forks: {},
+    }
+  );
+  // find top 5 ..
+  stars = Object.values(stars).slice(-5).reverse();
+  forks = Object.values(forks).slice(-5).reverse();
   // example data
-  const chartData = [
-    {
-      label: "HTML",
-      value: "13",
-    },
-    {
-      label: "CSS",
-      value: "160",
-    },
-    {
-      label: "JavaScript",
-      value: "80",
-    },
-  ];
+  // const chartData = [
+  //   {
+  //     label: "HTML",
+  //     value: "13",
+  //   },
+  //   {
+  //     label: "CSS",
+  //     value: "160",
+  //   },
+  //   {
+  //     label: "JavaScript",
+  //     value: "80",
+  //   },
+  // ];
 
   return (
     <section className="section">
       <Wrapper className="section-center">
-        <Pie3D data={languages} />;
+        <Pie3D data={mostUsed} />
+
+        <Doughnut2D data={mostPopular} />
+
+        <Column3D data={stars} />
+        <Bar3D data={forks} />
       </Wrapper>
     </section>
   );
