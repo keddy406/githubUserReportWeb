@@ -27,8 +27,10 @@ export default {
   twitter_username: "twkccy1990",
   public_repos: 33,
   public_gists: 0,
-  followers: 0,
-  following: 0,
+  // fake data
+  followers: 10,
+  // fake data
+  following: 8,
   created_at: "2019-09-01T02:08:54Z",
   updated_at: "2020-07-20T07:16:08Z",
 };

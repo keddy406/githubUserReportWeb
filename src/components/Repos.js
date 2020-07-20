@@ -4,7 +4,35 @@ import { GithubContext } from "../context/context";
 import { ExampleChart, Pie3D, Column3D, Bar3D, Doughnut2D } from "./Charts";
 const Repos = () => {
   const { repos } = React.useContext(GithubContext);
-  console.log(repos);
+
+  let languages = repos.reduce((total, item) => {
+    // destuct language value from item[language]
+    const { language } = item;
+    //language==null
+    if (!language) return total;
+    //calculate the language number
+    // set total arr and if new language set the index and vale = 1 else value +1
+    if (!total[language]) {
+      //match chartData value by setting new objects
+      total[language] = { label: language, value: 1 };
+    } else {
+      total[language] = {
+        ...total[language],
+        value: total[language].value + 1,
+      };
+    }
+    // console.log(language);
+
+    return total;
+  }, {});
+  //set array to objects and sort top 5 languages
+  languages = Object.values(languages)
+    .sort((a, b) => {
+      return b.value - a.value;
+    })
+    .slice(0, 5);
+
+  // example data
   const chartData = [
     {
       label: "HTML",
@@ -12,17 +40,18 @@ const Repos = () => {
     },
     {
       label: "CSS",
-      value: "166",
+      value: "160",
     },
     {
       label: "JavaScript",
       value: "80",
     },
   ];
+
   return (
     <section className="section">
       <Wrapper className="section-center">
-        <ExampleChart data={chartData} />;
+        <Pie3D data={languages} />;
       </Wrapper>
     </section>
   );
