@@ -17,20 +17,39 @@ const GithubProvider = ({ children }) => {
   const [followers, setFollowers] = useState(mockFollowers);
   //request loading
   const [requests, setRequests] = useState(0);
-  const [loading, setIsLoading] = useState(false);
-  //error
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState({ show: false, msg: "" });
 
   // search
   const searchGithubUser = async (user) => {
     //toggleError
-    //setLoading(true)
+    setIsLoading(true);
     const response = await axios(`${rootUrl}/users/${user}`)
-      .then((data) => {
-        setGithubUser(data);
-        console.log(data);
+      .then((res) => {
+        // console.log(res.data);
+        setGithubUser(res.data);
+        const { login, followers_url } = res.data;
+        //setting user repos
+        axios(`${rootUrl}/users/${login}/repos?per_page=100`)
+          .then((res) => {
+            setRepos(res.data);
+          })
+          .catch((err) => console.log(err, "from repos"));
+        //setting user followers
+        axios(`${followers_url}?per_page=100`)
+          .then((res) => {
+            setFollowers(res.data);
+          })
+          .catch((err) => console.log(err, "from followers"));
+      })
+      .then(() => {
+        // request api
+        checkRequests();
+        // set back loadinf that render the user
+        setIsLoading(false);
       })
       .catch((err) => toggleError(true, "there is no user with that username"));
+
     // console.log(response);
     // if (response) {
     //   setGithubUser(response.data);
@@ -38,6 +57,19 @@ const GithubProvider = ({ children }) => {
     //   toggleError(true, "there is no user with that username");
     // }
   };
+
+  // serach for user repos and followers
+  // function gitHubUserInfo(data) {
+  //   const { login, followers_url } = data;
+  //   //repos
+  //   axios(`{rootUrl}/users/${login}/repos?per_page=100`).then((res) => {
+  //     setRepos(res.data);
+  //   });
+  //   //followers
+  //   axios(`${followers_url}?per_page=100`).then((res) => {
+  //     setFollowers(res.data);
+  //   });
+  // }
 
   //check rate
   const checkRequests = () => {
@@ -72,6 +104,7 @@ const GithubProvider = ({ children }) => {
         requests,
         error,
         searchGithubUser,
+        isLoading,
       }}
     >
       {children}
