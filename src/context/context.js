@@ -48,7 +48,10 @@ const GithubProvider = ({ children }) => {
         // set back loadinf that render the user
         setIsLoading(false);
       })
-      .catch((err) => toggleError(true, "there is no user with that username"));
+      .catch((err) => {
+        setIsLoading(false);
+        toggleError(true, "there is no user with that username");
+      });
 
     // console.log(response);
     // if (response) {
